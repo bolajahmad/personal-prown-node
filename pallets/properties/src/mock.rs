@@ -1,5 +1,8 @@
-use crate as pallet_template;
-use frame_support::traits::{ConstU16, ConstU64};
+use crate as pallet_properties;
+use frame_support::{
+	parameter_types,
+	traits::{ConstU16, ConstU32, ConstU64},
+};
 use sp_core::H256;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
@@ -13,7 +16,8 @@ frame_support::construct_runtime!(
 	pub enum Test
 	{
 		System: frame_system,
-		TemplateModule: pallet_template,
+		PropertiesMod: pallet_properties,
+		Balances: pallet_balances,
 	}
 );
 
@@ -34,7 +38,7 @@ impl frame_system::Config for Test {
 	type BlockHashCount = ConstU64<250>;
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = ();
+	type AccountData = pallet_balances::AccountData<u128>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
@@ -43,9 +47,40 @@ impl frame_system::Config for Test {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
-impl pallet_template::Config for Test {
+parameter_types! {
+	pub const ExistentialDeposit: u64 = 1;
+	pub const MaxLocks: u32 = 10;
+	pub const MaxFreezes: u32 = 10;
+	pub const MaxHolds: u32 = 10;
+}
+
+impl pallet_balances::Config for Test {
+	type Balance = u128;
+	type DustRemoval = ();
+	type RuntimeEvent = RuntimeEvent;
+	type ExistentialDeposit = ExistentialDeposit;
+	type AccountStore = System;
+	type WeightInfo = ();
+	type MaxLocks = MaxLocks;
+	type MaxReserves = ();
+	type ReserveIdentifier = [u8; 8];
+	type FreezeIdentifier = ();
+	type RuntimeHoldReason = ();
+	type MaxHolds = MaxHolds;
+	type MaxFreezes = MaxFreezes;
+}
+
+parameter_types! {
+	pub const MaxCIDLength: u32 = 200;
+	pub const MinimumAssetPrice: u32 = 5;
+}
+
+impl pallet_properties::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
+	type Currency = Balances;
+	type MaxCIDLength = MaxCIDLength;
+	type MinAssetPrice = MinimumAssetPrice;
 }
 
 // Build genesis storage according to the mock runtime.
